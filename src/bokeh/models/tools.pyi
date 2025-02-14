@@ -34,7 +34,7 @@ from ..core.enums import (
     AutoType as Auto,
     DimensionsType as Dimensions,
     DimensionType as Dimension,
-    LogoStyleType as LogoStyle,
+    LogoVariantType as LogoVariant,
     PanDirectionType as PanDirection,
     RegionSelectionModeType as RegionSelectionMode,
     SelectionModeType as SelectionMode,
@@ -180,6 +180,14 @@ class InspectTool(GestureTool):
 
     toggleable: bool = ...
 
+class _LogoInit(_UIElementInit, total=False):
+    variant: LogoVariant
+
+class Logo(UIElement):
+    def __init__(self, **kwargs: Unpack[_LogoInit]) -> None: ...
+
+    variant: LogoVariant = ...
+
 class _ToolButtonInit(_UIElementInit, total=False):
     tool: Tool | ToolProxy
     icon: IconLike | None
@@ -195,7 +203,7 @@ class ToolButton(UIElement):
 class _ToolbarInit(_UIElementInit, total=False):
     tools: list[Tool | ToolProxy]
     children: Auto | list[UIElement | None]
-    logo: LogoStyle | None
+    logo: LogoVariant | None
     autohide: bool
     group: bool
     group_types: list[ToolName]
@@ -210,7 +218,7 @@ class Toolbar(UIElement):
 
     tools: list[Tool | ToolProxy] = ...
     children: Auto | list[UIElement | None] = ...
-    logo: LogoStyle | None = ...
+    logo: LogoVariant | None = ...
     autohide: bool = ...
     group: bool = ...
     group_types: list[ToolName] = ...
