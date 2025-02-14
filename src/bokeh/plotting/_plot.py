@@ -31,6 +31,7 @@ import numpy as np
 
 # Bokeh imports
 from ..core.property.datetime import Datetime
+from ..core.property.exceptions import ValueValidationError
 from ..core.property.singletons import Intrinsic
 from ..models import (
     Axis,
@@ -104,7 +105,7 @@ def get_range(range_input: Range | tuple[float, float] | Sequence[str] | pd.Seri
                 if end is None:
                     end = Intrinsic
                 return Range1d(start=start, end=end)
-            except ValueError:  # @mattpap suggests ValidationError instead
+            except ValueValidationError:
                 pass
     raise ValueError(f"Unrecognized range input: '{range_input}'")
 
