@@ -19,6 +19,7 @@ import type {BaseTextView} from "models/text/base_text"
 import {BaseText} from "models/text/base_text"
 import {build_view} from "core/build_views"
 import {round_rect} from "../common/painting"
+import {apply_border_radius, apply_padding, apply_box_styles} from "core/styles"
 
 export class TitleView extends AnnotationView {
   declare model: Title
@@ -225,57 +226,12 @@ export class TitleView extends AnnotationView {
         case "right": return {left: vmargin, right: vmargin, top: hmargin, bottom: hmargin}
       }
     })()
-    this.style.append(`
-    :host {
-      padding-left: ${margin.left}px;
-      padding-right: ${margin.right}px;
-      padding-top: ${margin.top}px;
-      padding-bottom: ${margin.bottom}px;
-    }
-    `)
 
-    const {padding} = this
-    this.style.append(`
-    .${title_css.label} {
-      padding-left: ${padding.left}px;
-      padding-right: ${padding.right}px;
-      padding-top: ${padding.top}px;
-      padding-bottom: ${padding.bottom}px;
-    }
-    `)
+    apply_padding(this.style, ":host", margin)
+    apply_padding(this.style, `.${title_css.label}`, this.padding)
 
-    const {border_radius} = this
-    this.style.append(`
-    .${title_css.label} {
-      border-top-left-radius: ${border_radius.top_left}px;
-      border-top-right-radius: ${border_radius.top_right}px;
-      border-bottom-right-radius: ${border_radius.bottom_right}px;
-      border-bottom-left-radius: ${border_radius.bottom_left}px;
-    }
-    `)
-
-    if (this.visuals.background_fill.doit) {
-      const {color} = this.visuals.background_fill.computed_values()
-      this.style.append(`
-      .${title_css.label} {
-        background-color: ${color};
-      }
-      `)
-    }
-
-    // TODO background_hatch (https://github.com/bokeh/bokeh/issues/14312)
-
-    if (this.visuals.border_line.doit) {
-      // TODO use background-image to replicate number[] dash patterns
-      const {color, width, dash} = this.visuals.border_line.computed_values()
-      this.style.append(`
-      .${title_css.label} {
-        border-color: ${color};
-        border-width: ${width}px;
-        border-style: ${isString(dash) ? dash : (dash.length < 2 ? "solid" : "dashed")};
-      }
-      `)
-    }
+    apply_border_radius(this.style, `.${title_css.label}`, this.border_radius)
+    apply_box_styles(this.style, `.${title_css.label}`, this.visuals)
   }
 }
 
