@@ -83,7 +83,7 @@ export abstract class TextAnnotationView extends AnnotationView {
       `)
     }
 
-    this.style.replace(`
+    this.self_style.replace(`
     :host {
       width: max-content;
       height: max-content;
@@ -107,7 +107,7 @@ export abstract class TextAnnotationView extends AnnotationView {
 
     if (this.layout != null) {
       if (angle != 0) {
-        this.style.append(`
+        this.self_style.append(`
         :host {
           writing-mode: vertical-rl;
           rotate: 180deg;
@@ -132,7 +132,7 @@ export abstract class TextAnnotationView extends AnnotationView {
         }
       })()
 
-      this.style.append(`
+      this.self_style.append(`
       :host {
         transform-origin: ${x_anchor} ${y_anchor};
         transform: translate(-${x_anchor}, -${y_anchor}) rotate(${angle}rad);
@@ -142,7 +142,7 @@ export abstract class TextAnnotationView extends AnnotationView {
 
     if (this.visuals.background_fill.doit) {
       this.visuals.background_fill.set_value(ctx)
-      this.style.append(`
+      this.self_style.append(`
       :host {
         background-color: ${ctx.fillStyle};
       }
@@ -153,7 +153,7 @@ export abstract class TextAnnotationView extends AnnotationView {
       this.visuals.border_line.set_value(ctx)
 
       // attempt to support vector-style ("8 4 8") line dashing for css mode
-      this.style.append(`
+      this.self_style.append(`
       :host {
         border-style: ${ctx.getLineDash().length < 2 ? "solid" : "dashed"};
         border-width: ${ctx.lineWidth}px;

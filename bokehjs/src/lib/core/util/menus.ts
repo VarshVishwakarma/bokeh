@@ -1,4 +1,5 @@
 import type {StyleSheetLike} from "../dom"
+import {LocalStyleSheet} from "../dom"
 import {div, empty, InlineStyleSheet, ClassList} from "../dom"
 import type {Orientation} from "../enums"
 import {reversed} from "./array"
@@ -183,10 +184,11 @@ export class ContextMenu {
   render(): void {
     this.empty()
 
-    for (const style of this.stylesheets()) {
-      const stylesheet = isString(style) ? new InlineStyleSheet(style) : style
-      stylesheet.install(this.shadow_el)
-    }
+    this.shadow_el.adoptedStyleSheets = this
+      .stylesheets()
+      .map((style) => isString(style) ? new InlineStyleSheet(style) : style)
+      .filter((style) => style instanceof LocalStyleSheet)
+      .map((sheet) => sheet.native)
 
     this.class_list.add(menus[this.orientation])
 

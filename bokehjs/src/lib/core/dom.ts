@@ -687,53 +687,36 @@ export enum MouseButton {
   Middle = Auxiliary,
 }
 
-export abstract class StyleSheet {
-  protected readonly el: HTMLStyleElement | HTMLLinkElement
+export abstract class StyleSheet {}
 
-  install(el: HTMLElement | ShadowRoot): void {
-    el.append(this.el)
-  }
+export abstract class LocalStyleSheet {
+  readonly native = new CSSStyleSheet()
 
-  uninstall(): void {
-    this.el.remove()
-  }
+  constructor(readonly description?: string) {}
 
-  abstract to_native(): CSSStyleSheet
-}
-
-export class InlineStyleSheet extends StyleSheet {
-  protected override readonly el = style()
-
-  constructor(css?: string | CSSStyleSheetDecl, id?: string, readonly persistent: boolean = false) {
-    super()
-    if (isString(css)) {
-      this._update(css)
-    } else if (css != null) {
-      this._update(compose_stylesheet(css))
-    }
-    if (id != null) {
-      this.el.dataset.css = id
-    }
+  protected _update(css: string): void {
+    const {description} = this
+    this.native.replaceSync(description != null ? `/** ${description} */\n${css}` : css)
   }
 
   get css(): string {
-    return this.el.textContent
+    return [...this.native.cssRules].map((rule) => rule.cssText).join("\n")
   }
+}
 
-  protected _update(css: string): void {
-    this.el.textContent = css
+export class InlineStyleSheet extends LocalStyleSheet {
+
+  constructor(css: string | CSSStyleSheetDecl = "", description?: string, readonly persistent: boolean = false) {
+    super(description)
+    this._update(isString(css) ? css : compose_stylesheet(css))
   }
 
   clear(): void {
-    this.replace("")
+    this._update("")
   }
 
   private _to_css(css: string, styles: CSSStyles | undefined): string {
-    if (styles == null) {
-      return css
-    } else {
-      return compose_stylesheet({[css]: styles})
-    }
+    return styles == null ? css : compose_stylesheet({[css]: styles})
   }
 
   replace(css: string, styles?: CSSStyles): void {
@@ -741,60 +724,51 @@ export class InlineStyleSheet extends StyleSheet {
   }
 
   prepend(css: string, styles?: CSSStyles): void {
-    this._update(`${this._to_css(css, styles)}\n${this.css}`)
+    this.native.insertRule(this._to_css(css, styles), 0)
   }
 
   append(css: string, styles?: CSSStyles): void {
-    this._update(`${this.css}\n${this._to_css(css, styles)}`)
-  }
-
-  remove(): void {
-    this.el.remove()
-  }
-
-  to_native(): CSSStyleSheet {
-    const sheet = new CSSStyleSheet()
-    sheet.replaceSync(this.css)
-    return sheet
+    this.native.insertRule(this._to_css(css, styles), this.native.cssRules.length)
   }
 }
 
-export class GlobalInlineStyleSheet extends InlineStyleSheet {
-  override install(): void {
+export class ImportedStyleSheet extends LocalStyleSheet {
+
+  constructor(readonly url: string, description?: string) {
+    super(description)
+    this._update(`@import "${url}";`)
+  }
+}
+
+export abstract class GlobalStyleSheet extends StyleSheet {
+  protected readonly el: HTMLStyleElement | HTMLLinkElement
+
+  install(): void {
     if (!this.el.isConnected) {
       document.head.appendChild(this.el)
     }
   }
+
+  uninstall(): void {
+    this.el.remove()
+  }
 }
 
-export class ImportedStyleSheet extends StyleSheet {
+export class GlobalInlineStyleSheet extends GlobalStyleSheet {
+  protected override readonly el: HTMLStyleElement
+
+  constructor(css: string | CSSStyleSheetDecl = "") {
+    super()
+    this.el = style(isString(css) ? css : compose_stylesheet(css))
+  }
+}
+
+export class GlobalImportedStyleSheet extends GlobalStyleSheet {
   protected override readonly el: HTMLLinkElement
 
   constructor(url: string) {
     super()
     this.el = link({rel: "stylesheet", href: url})
-  }
-
-  replace(url: string): void {
-    this.el.href = url
-  }
-
-  remove(): void {
-    this.el.remove()
-  }
-
-  to_native(): CSSStyleSheet {
-    const sheet = new CSSStyleSheet()
-    sheet.replaceSync(`@import "${this.el.href}"`)
-    return sheet
-  }
-}
-
-export class GlobalImportedStyleSheet extends ImportedStyleSheet {
-  override install(): void {
-    if (!this.el.isConnected) {
-      document.head.appendChild(this.el)
-    }
   }
 }
 
@@ -811,8 +785,6 @@ export async function dom_ready(): Promise<void> {
 export function px(value: number | string): string {
   return isNumber(value) ? `${value}px` : value
 }
-
-export const supports_adopted_stylesheets = "adoptedStyleSheets" in ShadowRoot.prototype
 
 export function has_focus(el: Element): boolean {
   const root = el.getRootNode()

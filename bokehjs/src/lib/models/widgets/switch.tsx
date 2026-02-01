@@ -1,9 +1,7 @@
 import {ToggleInput, ToggleInputView} from "./toggle_input"
 import {IconLike} from "../common/kinds"
 import type {StyleSheetLike, Keys} from "core/dom"
-import {InlineStyleSheet} from "core/dom"
 import {ShadowComponent, Icon, cls} from "core/vdom"
-import {isString} from "core/util/types"
 import type * as p from "core/properties"
 import * as icons_css from "styles/icons.css"
 import * as switch_css from "styles/widgets/switch.css"
@@ -68,10 +66,8 @@ export class SwitchView extends ToggleInputView {
     }
 
     const classes = [...this._css_classes()]
-
-    const stylesheets = [...this._stylesheets()]
-      .map((sheet) => isString(sheet) ? new InlineStyleSheet(sheet) : sheet)
-      .map((sheet) => sheet.to_native())
+    const stylesheets = this.adopted_stylesheets
+    // TODO install global stylesheets
 
     class ShadowSwitch extends Component<SwitchProps> {
       render(): VNode {

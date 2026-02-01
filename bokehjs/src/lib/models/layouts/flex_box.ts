@@ -1,4 +1,3 @@
-import type {FullDisplay} from "./layout_dom"
 import {LayoutDOM, LayoutDOMView} from "./layout_dom"
 import {GridAlignmentLayout} from "./alignments"
 import {Container} from "core/layout/grid"
@@ -22,14 +21,11 @@ export abstract class FlexBoxView extends LayoutDOMView {
     return this.model.children
   }
 
-  protected override _intrinsic_display(): FullDisplay {
-    return {inner: this.model.flow_mode, outer: "flex"}
-  }
-
   override _update_layout(): void {
     super._update_layout()
 
-    this.style.append(":host", {
+    this.self_style.append(":host", {
+      "--inner-display": "flex",
       flex_direction: this._direction,
       gap: px(this.model.spacing),
     })

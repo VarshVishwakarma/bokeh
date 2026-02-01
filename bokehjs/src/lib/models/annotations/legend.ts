@@ -284,7 +284,7 @@ export class LegendView extends AnnotationView {
     })()
 
     const title_styles = this.visuals.title_text.computed_values()
-    this.style.append(`
+    this.self_style.append(`
     .${legend_css.title} {
       font: ${title_styles.font};
       color: ${title_styles.color};
@@ -295,7 +295,7 @@ export class LegendView extends AnnotationView {
     `)
 
     const label_styles = this.visuals.label_text.computed_values()
-    this.style.append(`
+    this.self_style.append(`
     .${legend_css.item} .${legend_css.label} {
       font: ${label_styles.font};
       color: ${label_styles.color};
@@ -304,26 +304,34 @@ export class LegendView extends AnnotationView {
     `)
 
     const {anchor} = this
-    this.style.append(`
+    this.self_style.append(`
     :host {
       transform: translate(-${anchor.x*100}%, -${anchor.y*100}%);
     }
     `)
 
-    this.style.append(`
+    this.self_style.append(`
     :host {
       gap: ${px(this.model.title_standoff)};
     }
+    `)
+    this.self_style.append(`
     .${legend_css.grid} {
       gap: ${px(this.model.spacing)};
     }
+    `)
+    this.self_style.append(`
     .${legend_css.item} {
       gap: ${px(this.model.label_standoff)};
     }
+    `)
+    this.self_style.append(`
     .${legend_css.item} .${legend_css.glyph} {
       width: ${px(this.model.glyph_width)};
       height: ${px(this.model.glyph_height)};
     }
+    `)
+    this.self_style.append(`
     .${legend_css.item} .${legend_css.label} {
       min-width: ${px(this.model.label_width)};
       min-height: ${px(this.model.label_height)};
@@ -332,7 +340,7 @@ export class LegendView extends AnnotationView {
 
     if (this.visuals.item_background_fill.doit) {
       const {color} = this.visuals.item_background_fill.computed_values()
-      this.style.append(`
+      this.self_style.append(`
       .${legend_css.item} {
         --item-background-color: ${color};
       }
@@ -341,7 +349,7 @@ export class LegendView extends AnnotationView {
 
     if (this.visuals.item_background_hatch.doit) {
       const {scale, pattern} = this.visuals.item_background_hatch.computed_values()
-      this.style.append(`
+      this.self_style.append(`
       .${legend_css.item} {
         --item-background-hatch: url(${pattern});
         --item-background-hatch-scale: ${scale}px;
@@ -351,7 +359,7 @@ export class LegendView extends AnnotationView {
 
     if (this.visuals.inactive_fill.doit) {
       const {color} = this.visuals.inactive_fill.computed_values()
-      this.style.append(`
+      this.self_style.append(`
       .${legend_css.item} {
         --item-background-inactive-color: ${color};
       }
@@ -360,7 +368,7 @@ export class LegendView extends AnnotationView {
 
     if (this.visuals.inactive_hatch.doit) {
       const {scale, pattern} = this.visuals.inactive_hatch.computed_values()
-      this.style.append(`
+      this.self_style.append(`
       .${legend_css.item} {
         --item-background-inactive-hatch: url(${pattern});
         --item-background-inactive-hatch-scale: ${scale}px;
@@ -376,10 +384,10 @@ export class LegendView extends AnnotationView {
         case "right": return "column"
       }
     })()
-    this.style.append(`
-      :host {
-        grid-auto-flow: ${grid_auto_flow};
-      }
+    this.self_style.append(`
+    :host {
+      grid-auto-flow: ${grid_auto_flow};
+    }
     `)
 
     this.shadow_el.append(...(() => {
@@ -392,7 +400,7 @@ export class LegendView extends AnnotationView {
     })())
 
     const {padding, border_radius} = this
-    this.style.append(`
+    this.self_style.append(`
     :host {
       padding-left: ${padding.left}px;
       padding-right: ${padding.right}px;
@@ -408,7 +416,7 @@ export class LegendView extends AnnotationView {
 
     if (this.visuals.background_fill.doit) {
       const {color} = this.visuals.background_fill.computed_values()
-      this.style.append(`
+      this.self_style.append(`
       :host {
         --background-color: ${color};
         background-color: ${color};
@@ -418,7 +426,7 @@ export class LegendView extends AnnotationView {
 
     if (this.visuals.background_hatch.doit) {
       const {scale, pattern} = this.visuals.background_hatch.computed_values()
-      this.style.append(`
+      this.self_style.append(`
       :host {
         --background-hatch: url(${pattern});
         --background-hatch-scale: ${scale}px;
@@ -455,7 +463,7 @@ export class LegendView extends AnnotationView {
           }
         }
 
-        this.style.append(`
+        this.self_style.append(`
         :host {
           --border-color: ${color};
           --border-line-full-length: ${sum(dash)}px;
@@ -470,7 +478,7 @@ export class LegendView extends AnnotationView {
         `)
       // Empty dash array (solid border) or border-style supported string case
       } else {
-        this.style.append(`
+        this.self_style.append(`
         :host {
           border-color: ${color};
           border-width: ${width}px;

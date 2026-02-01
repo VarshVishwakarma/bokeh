@@ -12,11 +12,13 @@ import * as notifications_css from "styles/notifications.css"
 export const notifications_el: HTMLElement = (() => {
   const el = div()
   const shadow_el = el.attachShadow({mode: "open"})
-  new InlineStyleSheet(vars_css.default).install(shadow_el)
-  new InlineStyleSheet(core_css.default).install(shadow_el)
-  new InlineStyleSheet(icons_css.default).install(shadow_el)
-  new InlineStyleSheet(buttons_css.default).install(shadow_el)
-  new InlineStyleSheet(notifications_css.default).install(shadow_el)
+  shadow_el.adoptedStyleSheets = [
+    new InlineStyleSheet(vars_css.default).native,
+    new InlineStyleSheet(core_css.default).native,
+    new InlineStyleSheet(icons_css.default).native,
+    new InlineStyleSheet(buttons_css.default).native,
+    new InlineStyleSheet(notifications_css.default).native,
+  ]
   const entries_el = div({class: "entries"})
   shadow_el.append(entries_el)
   void dom_ready().then(() => document.body.append(el))

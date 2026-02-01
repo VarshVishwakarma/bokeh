@@ -1,7 +1,7 @@
 import {View} from "./view"
 import type {SerializableState} from "./view"
-import type {StyleSheet, StyleSheetLike, ARIARole} from "./dom"
-import {create_element, empty, InlineStyleSheet, ClassList} from "./dom"
+import type {StyleSheetLike, ARIARole} from "./dom"
+import {create_element, empty, InlineStyleSheet, LocalStyleSheet, GlobalStyleSheet, ClassList} from "./dom"
 import {isString} from "./util/types"
 import {assert} from "./util/assert"
 import type {BBox} from "./util/bbox"
@@ -157,15 +157,17 @@ export abstract class DOMComponentView extends DOMElementView {
     this.shadow_el = this.el.attachShadow({mode: "open"})
   }
 
+  static readonly _vars_style = new InlineStyleSheet(vars_css, "vars.css")
+  static readonly _core_style = new InlineStyleSheet(core_css, "core.css")
+
   readonly _css_vars = new InlineStyleSheet("", "vars")
 
   override stylesheets(): StyleSheetLike[] {
     const stylesheets = [...super.stylesheets()]
     if (this.is_top_level) {
-      stylesheets.push(new InlineStyleSheet(vars_css, "vars.css"))
+      stylesheets.push(DOMComponentView._vars_style)
     }
-    stylesheets.push(new InlineStyleSheet(core_css, "core.css"))
-    return stylesheets
+    return [...stylesheets, DOMComponentView._core_style]
   }
 
   /**
@@ -204,7 +206,7 @@ export abstract class DOMComponentView extends DOMElementView {
   render(): void {
     assert(!this.is_vdom, "only non-VDOM components")
     this.empty()
-    this._update_stylesheets()
+    this._apply_stylesheets()
     this._apply_html_attributes()
   }
 
@@ -234,23 +236,31 @@ export abstract class DOMComponentView extends DOMElementView {
 
   protected *_css_variables(): Iterable<[string, string]> {}
 
-  protected _applied_stylesheets: StyleSheet[] = []
-  protected _apply_stylesheets(stylesheets: StyleSheetLike[]): void {
-    const resolved_stylesheets = stylesheets.map((style) => isString(style) ? new InlineStyleSheet(style) : style)
-    this._applied_stylesheets.push(...resolved_stylesheets)
-    resolved_stylesheets.forEach((stylesheet) => stylesheet.install(this.shadow_el))
+  get resolved_stylesheets(): {local: LocalStyleSheet[], global: GlobalStyleSheet[]} {
+    const resolved = [...this._stylesheets()].map((style) => isString(style) ? new InlineStyleSheet(style) : style)
+    return {
+      local: resolved.filter((sheet) => sheet instanceof LocalStyleSheet),
+      global: resolved.filter((sheet) => sheet instanceof GlobalStyleSheet),
+    }
+  }
+
+  get adopted_stylesheets(): CSSStyleSheet[] {
+    return this.resolved_stylesheets.local.map((sheet) => sheet.native)
+  }
+
+  protected _applied_stylesheets: GlobalStyleSheet[] = []
+  protected _apply_stylesheets(): void {
+    const {local, global} = this.resolved_stylesheets
+    this.shadow_el.adoptedStyleSheets = local.map((sheet) => sheet.native)
+    this._applied_stylesheets.forEach((sheet) => sheet.uninstall())
+    global.forEach((sheet) => sheet.install())
+    this._applied_stylesheets = global
   }
 
   protected _applied_css_classes: string[] = []
   protected _apply_css_classes(classes: string[]): void {
     this._applied_css_classes.push(...classes)
     this.class_list.add(...classes)
-  }
-
-  protected _update_stylesheets(): void {
-    this._applied_stylesheets.forEach((stylesheet) => stylesheet.uninstall())
-    this._applied_stylesheets = []
-    this._apply_stylesheets([...this._stylesheets()])
   }
 
   protected _update_css_classes(): void {

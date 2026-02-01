@@ -12,7 +12,7 @@ import type {Tool} from "../tools/tool"
 import {ToolProxy} from "../tools/tool_proxy"
 import {ToolMenu} from "../tools/tool_menu"
 import type {Selection} from "../selections/selection"
-import type {DOMBoxSizing, FullDisplay} from "../layouts/layout_dom"
+import type {DOMBoxSizing} from "../layouts/layout_dom"
 import {LayoutDOM, LayoutDOMView} from "../layouts/layout_dom"
 import type {Plot} from "./plot"
 import {Annotation, AnnotationView} from "../annotations/annotation"
@@ -450,10 +450,6 @@ export class PlotView extends LayoutDOMView implements Paintable {
       width_policy: frame_width != null && width_policy == "auto" ? "fit" : width_policy,
       height_policy: frame_height != null && height_policy == "auto" ? "fit" : height_policy,
     }
-  }
-
-  protected override _intrinsic_display(): FullDisplay {
-    return {inner: this.model.flow_mode, outer: "grid"}
   }
 
   private _compute_layout_panels(): LayoutPanels {

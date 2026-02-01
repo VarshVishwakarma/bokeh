@@ -41,7 +41,7 @@ export abstract class UIElementView extends StyledElementView {
   }
 
   update_style(): void {
-    this.style.clear()
+    this.self_style.clear()
   }
 
   box_sizing(): DOMBoxSizing {
