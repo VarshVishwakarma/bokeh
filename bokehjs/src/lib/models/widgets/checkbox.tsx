@@ -5,7 +5,6 @@ import type * as p from "core/properties"
 import checkbox_css from "styles/widgets/checkbox.css"
 import * as toggle_css from "styles/widgets/toggle_input.css"
 
-import {render} from "preact"
 import type {VNode} from "preact"
 import {signal} from "@preact/signals"
 import type {Signal} from "@preact/signals"
@@ -63,7 +62,7 @@ export class CheckboxView extends ToggleInputView {
     }
   }
 
-  component(): VNode {
+  override component(): VNode {
     const classes = [...this._css_classes()]
     const stylesheets = this.adopted_stylesheets
 
@@ -75,12 +74,6 @@ export class CheckboxView extends ToggleInputView {
       </ShadowComponent>
     )
   }
-
-  override render(): void {
-    render(this.component(), this.el.parentNode!, this.el) // TODO preact-root-fragment
-  }
-
-  override readonly is_vdom = true
 }
 
 export namespace Checkbox {

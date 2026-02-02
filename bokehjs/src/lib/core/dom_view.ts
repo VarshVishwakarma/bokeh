@@ -8,6 +8,9 @@ import type {BBox} from "./util/bbox"
 import vars_css from "styles/vars.css"
 import core_css from "styles/core.css"
 
+import type {VNode} from "preact"
+import {render} from "preact"
+
 export type RenderingTarget = HTMLElement | ShadowRoot
 
 export interface DOMView extends View {
@@ -62,16 +65,9 @@ export abstract class DOMView extends View {
     this.r_after_render()
   }
 
-  readonly is_vdom: boolean = false
-
   render_to(target: Node): void {
-    if (this.is_vdom) {
-      target.appendChild(this.el)
-    }
     this.render()
-    if (!this.is_vdom) {
-      target.appendChild(this.el)
-    }
+    target.appendChild(this.el)
   }
 
   after_render(): void {
@@ -203,11 +199,31 @@ export abstract class DOMComponentView extends DOMElementView {
     }
   }
 
+  override render_to(target: Node): void {
+    if (this.is_vdom) {
+      target.appendChild(this.el)
+    }
+    this.render()
+    target.appendChild(this.el)
+    if (this.is_vdom) {
+      target.appendChild(this.el)
+    }
+  }
+
+  get is_vdom(): boolean {
+    return this.component != null
+  }
+
+  component?(): VNode
+
   render(): void {
-    assert(!this.is_vdom, "only non-VDOM components")
-    this.empty()
-    this._apply_stylesheets()
-    this._apply_html_attributes()
+    if (this.component != null) {
+      render(this.component(), this.el.parentNode!, this.el) // TODO preact-root-fragment
+    } else {
+      this.empty()
+      this._apply_stylesheets()
+      this._apply_html_attributes()
+    }
   }
 
   protected _applied_html_attributes: string[] = []

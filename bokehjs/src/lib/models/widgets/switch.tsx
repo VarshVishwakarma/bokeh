@@ -8,7 +8,7 @@ import * as switch_css from "styles/widgets/switch.css"
 import * as toggle_css from "styles/widgets/toggle_input.css"
 
 import type {VNode, TargetedEvent} from "preact"
-import {Component, render} from "preact"
+import {Component} from "preact"
 import {signal} from "@preact/signals"
 import type {Signal} from "@preact/signals"
 
@@ -52,7 +52,7 @@ export class SwitchView extends ToggleInputView {
     }
   }
 
-  override render(): void {
+  override component(): VNode {
     const view = this
 
     type SwitchProps = {
@@ -100,11 +100,8 @@ export class SwitchView extends ToggleInputView {
       }
     }
 
-    const el = <ShadowSwitch></ShadowSwitch>
-    render(el, this.el.parentNode!, this.el) // TODO preact-root-fragment
+    return <ShadowSwitch></ShadowSwitch>
   }
-
-  override readonly is_vdom = true
 }
 
 export namespace Switch {
