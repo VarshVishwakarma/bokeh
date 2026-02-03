@@ -3,7 +3,8 @@ import {DOMNode} from "../dom/dom_node"
 import {Text} from "../dom/text"
 import {Signal} from "core/signaling"
 import type {StyleSheetLike, Keys} from "core/dom"
-import {InlineStyleSheet, px, div, bounding_box, dom_ready} from "core/dom"
+import {px, div, bounding_box, dom_ready} from "core/dom"
+import {StaticStyleSheet, InlineStyleSheet} from "core/stylesheets"
 import {isString} from "core/util/types"
 import type {View, ViewOf} from "core/build_views"
 import {build_view} from "core/build_views"
@@ -36,7 +37,7 @@ const _stacking_order: DialogView[] = []
 const _minimization_area: HTMLElement = (() => {
   const el = div()
   const shadow_el = el.attachShadow({mode: "open"})
-  const stylesheet = new InlineStyleSheet(`
+  const stylesheet = new StaticStyleSheet(`
 :host {
   display: flex;
   flex-direction: column;

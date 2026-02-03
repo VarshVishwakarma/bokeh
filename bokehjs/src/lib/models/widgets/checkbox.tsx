@@ -36,7 +36,7 @@ export class CheckboxView extends ToggleInputView {
   //   stylesheets
   override component(): VNode {
     const classes = [...this._css_classes()]
-    const stylesheets = this.adopted_stylesheets
+    const stylesheets = this.resolved_stylesheets
 
     const {active, label, disabled} = this.signals
     return (

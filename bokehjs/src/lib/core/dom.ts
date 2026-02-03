@@ -2,9 +2,20 @@ import {isBoolean, isNumber, isString, isArray, isPlainObject} from "./util/type
 import {entries} from "./util/object"
 import {BBox} from "./util/bbox"
 import type {Size, Box, Extents, PlainObject} from "./types"
-import type {CSSStyles, CSSStyleSheetDecl} from "./css"
-import {compose_stylesheet, apply_styles} from "./css"
+import type {CSSStyles} from "./css"
+import {apply_styles} from "./css"
 import {logger} from "./logging"
+
+// For backwards compatibility.
+export {
+  StyleSheet,
+  InlineStyleSheet,
+  ImportedStyleSheet,
+  GlobalInlineStyleSheet,
+  GlobalImportedStyleSheet,
+} from "./stylesheets"
+export type {StyleSheetLike} from "./stylesheets"
+//
 
 export type Optional<T> = {[P in keyof T]?: T[P] | null | undefined}
 
@@ -686,93 +697,6 @@ export enum MouseButton {
   Right = Secondary,
   Middle = Auxiliary,
 }
-
-export abstract class StyleSheet {}
-
-export abstract class LocalStyleSheet {
-  readonly native = new CSSStyleSheet()
-
-  constructor(readonly description?: string) {}
-
-  protected _update(css: string): void {
-    const {description} = this
-    this.native.replaceSync(description != null ? `/** ${description} */\n${css}` : css)
-  }
-
-  get css(): string {
-    return [...this.native.cssRules].map((rule) => rule.cssText).join("\n")
-  }
-}
-
-export class InlineStyleSheet extends LocalStyleSheet {
-
-  constructor(css: string | CSSStyleSheetDecl = "", description?: string, readonly persistent: boolean = false) {
-    super(description)
-    this._update(isString(css) ? css : compose_stylesheet(css))
-  }
-
-  clear(): void {
-    this._update("")
-  }
-
-  private _to_css(css: string, styles: CSSStyles | undefined): string {
-    return styles == null ? css : compose_stylesheet({[css]: styles})
-  }
-
-  replace(css: string, styles?: CSSStyles): void {
-    this._update(this._to_css(css, styles))
-  }
-
-  prepend(css: string, styles?: CSSStyles): void {
-    this.native.insertRule(this._to_css(css, styles), 0)
-  }
-
-  append(css: string, styles?: CSSStyles): void {
-    this.native.insertRule(this._to_css(css, styles), this.native.cssRules.length)
-  }
-}
-
-export class ImportedStyleSheet extends LocalStyleSheet {
-
-  constructor(readonly url: string, description?: string) {
-    super(description)
-    this._update(`@import "${url}";`)
-  }
-}
-
-export abstract class GlobalStyleSheet extends StyleSheet {
-  protected readonly el: HTMLStyleElement | HTMLLinkElement
-
-  install(): void {
-    if (!this.el.isConnected) {
-      document.head.appendChild(this.el)
-    }
-  }
-
-  uninstall(): void {
-    this.el.remove()
-  }
-}
-
-export class GlobalInlineStyleSheet extends GlobalStyleSheet {
-  protected override readonly el: HTMLStyleElement
-
-  constructor(css: string | CSSStyleSheetDecl = "") {
-    super()
-    this.el = style(isString(css) ? css : compose_stylesheet(css))
-  }
-}
-
-export class GlobalImportedStyleSheet extends GlobalStyleSheet {
-  protected override readonly el: HTMLLinkElement
-
-  constructor(url: string) {
-    super()
-    this.el = link({rel: "stylesheet", href: url})
-  }
-}
-
-export type StyleSheetLike = StyleSheet | string
 
 export async function dom_ready(): Promise<void> {
   if (document.readyState == "loading") {

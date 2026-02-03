@@ -1,16 +1,18 @@
 import {View} from "./view"
 import type {SerializableState} from "./view"
-import type {StyleSheetLike, ARIARole} from "./dom"
-import {create_element, empty, InlineStyleSheet, LocalStyleSheet, GlobalStyleSheet, ClassList} from "./dom"
+import {RenderStylesheets, create_root_fragment} from "./vdom"
+import type {ARIARole} from "./dom"
+import {create_element, ClassList} from "./dom"
+import {InlineStyleSheet, StaticStyleSheet} from "./stylesheets"
+import type {StyleSheetLike, StyleSheet} from "./stylesheets"
 import {isString} from "./util/types"
 import {assert} from "./util/assert"
 import type {BBox} from "./util/bbox"
-import {create_root_fragment} from "./vdom"
 import vars_css from "styles/vars.css"
 import core_css from "styles/core.css"
 
 import type {VNode} from "preact"
-import {render} from "preact"
+import {render, h} from "preact"
 import type {Signal} from "@preact/signals"
 
 export type RenderingTarget = HTMLElement | ShadowRoot
@@ -169,8 +171,8 @@ export abstract class DOMComponentView extends DOMElementView {
     this.shadow_el = this.el.attachShadow({mode: "open"})
   }
 
-  static readonly _vars_style = new InlineStyleSheet(vars_css, "vars.css")
-  static readonly _core_style = new InlineStyleSheet(core_css, "core.css")
+  static readonly _vars_style = new StaticStyleSheet(vars_css) // "vars.css"
+  static readonly _core_style = new StaticStyleSheet(core_css) // "core.css"
 
   readonly _css_vars = new InlineStyleSheet("", "vars")
 
@@ -204,10 +206,15 @@ export abstract class DOMComponentView extends DOMElementView {
   }
 
   empty(): void {
-    empty(this.shadow_el)
+    for (const child of this.shadow_el.childNodes) {
+      if (child.nodeName != "STYLE" && child.nodeName != "LINK") {
+        this.shadow_el.removeChild(child)
+      }
+    }
+
     this.class_list.clear()
+
     this._applied_css_classes = []
-    this._applied_stylesheets = []
     for (const stylesheet of this.computed_stylesheets()) {
       if (!stylesheet.persistent) {
         stylesheet.clear()
@@ -267,25 +274,23 @@ export abstract class DOMComponentView extends DOMElementView {
 
   protected *_css_variables(): Iterable<[string, string]> {}
 
-  get resolved_stylesheets(): {local: LocalStyleSheet[], global: GlobalStyleSheet[]} {
-    const resolved = [...this._stylesheets()].map((style) => isString(style) ? new InlineStyleSheet(style) : style)
+  get resolved_stylesheets(): StyleSheet[] {
+    return [...this._stylesheets()].map((style) => isString(style) ? new StaticStyleSheet(style) : style)
+  }
+
+  get adopted_stylesheets(): {local: StyleSheet[], global: StyleSheet[]} {
+    const stylesheets = this.resolved_stylesheets
     return {
-      local: resolved.filter((sheet) => sheet instanceof LocalStyleSheet),
-      global: resolved.filter((sheet) => sheet instanceof GlobalStyleSheet),
+      local: stylesheets.filter((sheet) => !sheet.is_global),
+      global: stylesheets.filter((sheet) => sheet.is_global),
     }
   }
 
-  get adopted_stylesheets(): CSSStyleSheet[] {
-    return this.resolved_stylesheets.local.map((sheet) => sheet.native)
-  }
-
-  protected _applied_stylesheets: GlobalStyleSheet[] = []
   protected _apply_stylesheets(): void {
-    const {local, global} = this.resolved_stylesheets
-    this.shadow_el.adoptedStyleSheets = local.map((sheet) => sheet.native)
-    this._applied_stylesheets.forEach((sheet) => sheet.uninstall())
-    global.forEach((sheet) => sheet.install())
-    this._applied_stylesheets = global
+    const {local, global} = this.adopted_stylesheets
+    // use h(), because not a *.tsx file
+    render(h(RenderStylesheets, {stylesheets: local}), this.children_el)
+    render(h(RenderStylesheets, {stylesheets: global}), document.head)
   }
 
   protected _applied_css_classes: string[] = []

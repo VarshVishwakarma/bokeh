@@ -3,6 +3,7 @@ import {ToolIcon} from "./enums"
 import {isArray, isPlainObject} from "./util/types"
 import {omit} from "./util/object"
 import type {IconLike} from "../models/common/kinds"
+import type {StyleSheet} from "./stylesheets"
 
 import type {Signalish, SignalLike} from "preact"
 import type {VNode, HTMLAttributes, ContainerNode} from "preact"
@@ -28,22 +29,33 @@ export function cls(...classes: CSSClasses[]): string {
   return [...new Set(transformed)].join(" ")
 }
 
+export type RenderStylesheetsProps = {
+  stylesheets?: StyleSheet[]
+}
+export class RenderStylesheets extends Component<RenderStylesheetsProps> {
+  render(): VNode {
+    const {stylesheets=[]} = this.props
+    return <>{stylesheets.map((sheet) => sheet.vnode)}</>
+  }
+}
+
 export type ShadowComponentProps = HTMLAttributes<HTMLDivElement> & {
-  //component: string
-  stylesheets?: CSSStyleSheet[]
+  stylesheets?: StyleSheet[]
 }
 export class ShadowComponent extends Component<ShadowComponentProps> {
   render(): VNode {
     const attach_shadow = (el: HTMLElement | null): void => {
       if (el != null) {
         const shadow_el = el.shadowRoot ?? el.attachShadow({mode: "open"})
-        shadow_el.adoptedStyleSheets = this.props.stylesheets ?? []
-        render(this.props.children, shadow_el)
+        const children = (
+          <>
+            <RenderStylesheets stylesheets={this.props.stylesheets}></RenderStylesheets>
+            {this.props.children}
+          </>
+        )
+        render(children, shadow_el)
       }
     }
-    //const classes = cls(`bk-${this.props.component}`, this.props.class)
-    //const props = omit(this.props, ["class", "component", "stylesheets"])
-    //return <div class={classes} {...props} ref={attach_shadow}></div>
     const props = omit(this.props, ["stylesheets", "children"])
     return <div {...props} ref={attach_shadow}></div>
   }

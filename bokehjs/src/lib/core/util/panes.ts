@@ -1,6 +1,6 @@
 import type {StyleSheetLike, Keys} from "../dom"
-import {LocalStyleSheet} from "../dom"
-import {div, empty, InlineStyleSheet, ClassList} from "../dom"
+import {div, empty, ClassList} from "../dom"
+import {StaticStyleSheet, InlineBaseStyleSheet} from "../stylesheets"
 import type {Orientation} from "../enums"
 import {isString} from "./types"
 
@@ -107,8 +107,8 @@ export class DropPane { //extends DOMComponentView {
 
     this.shadow_el.adoptedStyleSheets = this
       .stylesheets()
-      .map((style) => isString(style) ? new InlineStyleSheet(style) : style)
-      .filter((style) => style instanceof LocalStyleSheet)
+      .map((style) => isString(style) ? new StaticStyleSheet(style) : style)
+      .filter((style) => style instanceof InlineBaseStyleSheet)
       .map((sheet) => sheet.native)
 
     this.shadow_el.append(...this.contents)

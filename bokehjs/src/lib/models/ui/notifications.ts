@@ -1,6 +1,7 @@
 import {UIElement, UIElementView} from "./ui_element"
 import type * as p from "core/properties"
-import {dom_ready, span, div, InlineStyleSheet} from "core/dom"
+import {dom_ready, span, div} from "core/dom"
+import {StaticStyleSheet} from "core/stylesheets"
 import {Signal} from "core/signaling"
 
 import * as vars_css from "styles/vars.css"
@@ -13,11 +14,11 @@ export const notifications_el: HTMLElement = (() => {
   const el = div()
   const shadow_el = el.attachShadow({mode: "open"})
   shadow_el.adoptedStyleSheets = [
-    new InlineStyleSheet(vars_css.default).native,
-    new InlineStyleSheet(core_css.default).native,
-    new InlineStyleSheet(icons_css.default).native,
-    new InlineStyleSheet(buttons_css.default).native,
-    new InlineStyleSheet(notifications_css.default).native,
+    new StaticStyleSheet(vars_css.default).native,
+    new StaticStyleSheet(core_css.default).native,
+    new StaticStyleSheet(icons_css.default).native,
+    new StaticStyleSheet(buttons_css.default).native,
+    new StaticStyleSheet(notifications_css.default).native,
   ]
   const entries_el = div({class: "entries"})
   shadow_el.append(entries_el)

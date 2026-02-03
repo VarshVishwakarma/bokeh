@@ -32,8 +32,7 @@ export class SwitchView extends ToggleInputView {
     }
 
     const classes = [...this._css_classes()]
-    const stylesheets = this.adopted_stylesheets
-    // TODO install global stylesheets
+    const stylesheets = this.resolved_stylesheets
 
     class ShadowSwitch extends Component<SwitchProps> {
       render(): VNode {
