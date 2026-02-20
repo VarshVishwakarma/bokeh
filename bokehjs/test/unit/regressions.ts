@@ -1925,17 +1925,17 @@ describe("Bug", () => {
   min-width: 0;
   min-height: 0;
 }`
-      expect(sv0.parent_style.css).to.be.equal(css)
-      expect(sv1.parent_style.css).to.be.equal(css)
-      expect(sv2.parent_style.css).to.be.equal(css)
+      expect(sv0.parent_style.css.value).to.be.equal(css)
+      expect(sv1.parent_style.css.value).to.be.equal(css)
+      expect(sv2.parent_style.css.value).to.be.equal(css)
 
       sv0.rerender()
       sv1.rerender()
       sv2.rerender()
 
-      expect(sv0.parent_style.css).to.be.equal(css)
-      expect(sv1.parent_style.css).to.be.equal(css)
-      expect(sv2.parent_style.css).to.be.equal(css)
+      expect(sv0.parent_style.css.value).to.be.equal(css)
+      expect(sv1.parent_style.css.value).to.be.equal(css)
+      expect(sv2.parent_style.css.value).to.be.equal(css)
     })
   })
 
