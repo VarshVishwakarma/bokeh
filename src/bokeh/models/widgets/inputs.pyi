@@ -104,6 +104,7 @@ class Spinner(NumericInput):
 class _ToggleInputInit(_WidgetInit, total=False):
     active: bool
     label: str
+    tri_state: bool
 
 class ToggleInput(Widget):
     @abstractmethod
@@ -111,6 +112,7 @@ class ToggleInput(Widget):
 
     active: bool = ...
     label: str = ...
+    tri_state: bool = ...
 
 class _CheckboxInit(_ToggleInputInit, total=False):
     ...
