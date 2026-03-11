@@ -65,12 +65,12 @@ export class SwitchView extends ToggleInputView {
   }
 
   protected _update_active(): void {
-    const {active, on_icon, off_icon, mixed_icon} = this.model
-    const is_mixed = active === null
-    this.el.classList.toggle(switch_css.active, !is_mixed && active)
-    this.el.classList.toggle(switch_css.mixed, is_mixed)
-    this.el.ariaChecked = !is_mixed && active ? "true" : is_mixed ? "mixed" : "false"
-    this._apply_icon(!is_mixed && active ? on_icon : is_mixed ? mixed_icon : off_icon)
+    const {active, on_icon, off_icon, indeterminate_icon} = this.model
+    const is_indeterminate = active === null
+    this.el.classList.toggle(switch_css.active, !is_indeterminate && active)
+    this.el.classList.toggle(switch_css.indeterminate, is_indeterminate)
+    this.el.ariaChecked = !is_indeterminate && active ? "true" : is_indeterminate ? "mixed" : "false"
+    this._apply_icon(!is_indeterminate && active ? on_icon : is_indeterminate ? indeterminate_icon : off_icon)
   }
 
   protected _update_disabled(): void {
@@ -83,7 +83,7 @@ export namespace Switch {
   export type Props = ToggleInput.Props & {
     on_icon: p.Property<IconLike | null>
     off_icon: p.Property<IconLike | null>
-    mixed_icon: p.Property<IconLike | null>
+    indeterminate_icon: p.Property<IconLike | null>
   }
 }
 
@@ -103,7 +103,7 @@ export class Switch extends ToggleInput {
     this.define<Switch.Props>(({Nullable}) => ({
       on_icon: [ Nullable(IconLike), null ],
       off_icon: [ Nullable(IconLike), null ],
-      mixed_icon: [ Nullable(IconLike), null ],
+      indeterminate_icon: [ Nullable(IconLike), null ],
     }))
   }
 }

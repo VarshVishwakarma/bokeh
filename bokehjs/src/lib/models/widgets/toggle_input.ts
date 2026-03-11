@@ -16,7 +16,8 @@ export abstract class ToggleInputView extends WidgetView {
   override connect_signals(): void {
     super.connect_signals()
 
-    const {active, disabled, label} = this.model.properties
+    const {active, disabled, label, tri_state} = this.model.properties
+    this.on_change(tri_state, () => this._update_active())
     this.on_change(active, () => this._update_active())
     this.on_change(disabled, () => this._update_disabled())
     this.on_change(label, () => this._update_label())
@@ -28,9 +29,9 @@ export abstract class ToggleInputView extends WidgetView {
 
   protected _toggle_active(): void {
     const {active, disabled, tri_state} = this.model
-    const is_mixed = active === null
+    const is_indeterminate = active === null
     if (!disabled) {
-      this.model.active = !is_mixed && active ? !active : is_mixed || !tri_state ? true : null
+      this.model.active = !is_indeterminate && active ? !active : is_indeterminate || !tri_state ? true : null
     }
   }
 
