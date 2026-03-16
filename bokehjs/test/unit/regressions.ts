@@ -908,7 +908,7 @@ describe("Bug", () => {
                 context_menu: null,
               },
             },
-            color_scheme: "light",
+            color_scheme: "auto",
           },
         },
         roots: [{
